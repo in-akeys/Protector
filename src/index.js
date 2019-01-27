@@ -1,6 +1,8 @@
 const CodeFlask = require('codeflask')
 const {encrypt,decrypt} = require('./util/encrypt-decrypt')
 const {ipcRenderer,remote} =require('electron')
+const fs = require('fs');
+const path = require('path')
 const flask = new CodeFlask('#my-selector', {
     language: 'txt',
   //  defaultTheme: false,
@@ -9,20 +11,33 @@ const flask = new CodeFlask('#my-selector', {
 const initialFileName = 'Untitled File'
 document.title = initialFileName;
 
-flask.onUpdate(code=>{
-    console.log("file updated ->" + code);
-    if(code && code!=""){
-        console.log("file updated");
-        ipcRenderer.send('fileInitalized',false);
+const p= ipcRenderer.sendSync('sendProcessObj')
+console.log(p.argv);
+if(p && p.platform == 'win32' && p.argv.length >= 2 ){
+    var openFilePath
+    if( p.argv[1]!='.'){
+        openFilePath = p.argv[1];
+        fs.readFile(openFilePath, 'utf-8', (err, data) => {
+            //console.log(filepath);
+            if (err) {
+                alert("An error ocurred reading the file :" + err.message);
+                return;
+            }
+            flask.updateCode(decrypt("Akhil",data));
+            document.title=path.basename(openFilePath);
+        });
+    }
+}
 
+flask.onUpdate(code=>{
+    if(code && code!=""){
+        ipcRenderer.send('fileInitalized',false);
     }
 });
 
 ipcRenderer.on("openFile", (event, data,fileName) => {
     flask.updateCode(decrypt("Akhil",data));
     document.title=fileName;
-    //encrypt("Akhil",data);
-
 })
 
 ipcRenderer.on("giveFileContents",event=>{
@@ -34,10 +49,5 @@ ipcRenderer.on("giveFileContents",event=>{
 ipcRenderer.on("newFile",event=>{
     document.title = initialFileName;
     flask.updateCode('');
-})
-
-
-ipcRenderer.on("showLineNo",event=>{
-    
 })
 
