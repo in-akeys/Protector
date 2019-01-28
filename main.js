@@ -1,6 +1,6 @@
 //require('electron-reload')(__dirname)
 
-const { app, BrowserWindow,ipcMain,Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const path = require('path')
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -9,14 +9,21 @@ let win
 
 function createWindow() {
     // Create the browser window.
-    win = new BrowserWindow({ width: 800, height: 600 ,webPreferences:{nodeIntegration: true}})
-    
+    win = new BrowserWindow(
+        {
+            width: 800,
+            height: 600,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        })
+
     // and load the index.html of the app.
     win.loadFile(path.join(__dirname, '/src/index.html'))
-    
+
     // Open the DevTools.
     //win.webContents.openDevTools()
-    
+
     // Emitted when the window is closed.
     win.on('closed', () => {
         // Dereference the window object, usually you would store windows
@@ -24,7 +31,7 @@ function createWindow() {
         // when you should delete the corresponding element.
         win = null
     })
-    global.win=win;
+    global.win = win;
     require('./src/menu/menu.js')
 }
 
@@ -52,13 +59,12 @@ app.on('activate', () => {
 
 //register listeners
 
-ipcMain.on("fileInitalized",(event,isFileEmpty)=>{
-    if(!isFileEmpty){
-        console.log("file non empty")
+ipcMain.on("fileInitalized", (event, isFileEmpty) => {
+    if (!isFileEmpty) {
         const menu = Menu.getApplicationMenu()
-        if(menu){
+        if (menu) {
             const newFileMenuItem = menu.getMenuItemById('newFile')
-            newFileMenuItem ? newFileMenuItem.enabled=true : ""
+            newFileMenuItem ? newFileMenuItem.enabled = true : ""
         }
     }
 })
@@ -66,6 +72,6 @@ ipcMain.on("fileInitalized",(event,isFileEmpty)=>{
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-ipcMain.on("sendProcessObj", e=>{
-    e.returnValue =process;
+ipcMain.on("sendProcessObj", e => {
+    e.returnValue = process;
 });

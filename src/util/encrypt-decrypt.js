@@ -3,7 +3,6 @@ const crypto = require('crypto');
 module.exports.encrypt = function (password, data, algorithm = 'aes-192-cbc') {
     if (!password || !data)
         return;
-    console.log('hello');
     // Key length is dependent on the algorithm. In this case for aes192, it is
     // 24 bytes (192 bits).
     // Use async `crypto.scrypt()` instead.
@@ -15,7 +14,6 @@ module.exports.encrypt = function (password, data, algorithm = 'aes-192-cbc') {
 
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    console.log(encrypted);
     return encrypted;
 }
 
@@ -30,7 +28,6 @@ module.exports.decrypt = function (password,data,algorithm = 'aes-192-cbc') {
 
     let decrypted = decipher.update(data, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    console.log(decrypted);
     return decrypted;
    
 }
