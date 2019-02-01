@@ -22,7 +22,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '/src/index.html'))
 
     // Open the DevTools.
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 
     // Emitted when the window is closed.
     win.on('closed', () => {
@@ -79,6 +79,5 @@ ipcMain.on("sendProcessObj", e => {
 
 
 ipcMain.on("informMainWindow", (event,data) => {
-
     win.webContents.send("informMainWindow",data);
 });

@@ -47,17 +47,6 @@ flask.onUpdate(code=>{
     }
 });
 
-
-//let fileData;
-/* ipcRenderer.on("openFile", (event, data,fileName) => {
-    fileData=data;
-    askPassword(()=>{
-        flask.updateCode(decrypt(globalConst.DEFAULT_PASSWORD,data));
-        document.title=fileName;
-    });
-    
-}) */
-
 /**
  * Will return 0 if user confirms to discard changes.
  * else 1.
@@ -75,11 +64,6 @@ function confirmDiscardChanges() {
             }}*/
     );
 }
-
-ipcRenderer.on("giveFileContents",event=>{
-    let code = flask.getCode();
-    ipcRenderer.send('encryptedfileContents',encrypt(globalConst.DEFAULT_PASSWORD,code));
-})
 
 ipcRenderer.on("newFile", event => {
     if (!flask.getCode()) {
@@ -150,13 +134,12 @@ function openFile(fileData) {
     }
 }
 
-
 //will return a promise
 function askPassword() {
     let win = new remote.BrowserWindow({ width: 200, height: 100, minimizable: false, alwaysOnTop: true, maximizable: false });
     win.on('close', () => win = null)
     win.loadFile(path.join(__dirname, '/password.html'))
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
     win.setMenu(null);
     return new Promise(function (resolve, reject) {
         ipcRenderer.on("informMainWindow", (event, { type, data }) => {
