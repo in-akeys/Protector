@@ -27,6 +27,7 @@ if(p && p.platform == 'win32' && p.argv.length >= 2 ){
     var openFilePath
     if( p.argv[1]!='.'){
         openFilePath = p.argv[1];
+        console.log(openFilePath);
         readFileAskPassword(openFilePath);
     }
 }
@@ -140,12 +141,12 @@ function askPassword() {
 }
 
 function readFileAskPassword(filePath){
-    fs.readFile(filepath, 'utf-8', (err, data) => {
+    fs.readFile(filePath, 'utf-8', (err, data) => {
         if (err) {
             alert("An error ocurred reading the file :" + err.message);
             return;
         }
-        let fileName = path.basename(filepath);
+        let fileName = path.basename(filePath);
         askPassword().then((password) => {
             openFile({ 'fileName': fileName, 'password': password, contents: data });
         })
