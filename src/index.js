@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path')
 const globalConst = require('./consts')
 const { dialog } = require('electron').remote
-const flask = new CodeFlask('#my-selector', {
+const flask = new CodeFlask('#editor', {
     language: 'txt',
   //  defaultTheme: false,
     //lineNumbers: true
@@ -27,15 +27,7 @@ if(p && p.platform == 'win32' && p.argv.length >= 2 ){
     var openFilePath
     if( p.argv[1]!='.'){
         openFilePath = p.argv[1];
-        fs.readFile(openFilePath, 'utf-8', (err, data) => {
-            //console.log(filepath);
-            if (err) {
-                alert("An error ocurred reading the file :" + err.message);
-                return;
-            }
-            flask.updateCode(decrypt(globalConst.DEFAULT_PASSWORD,data));
-            document.title=path.basename(openFilePath);
-        });
+        readFileAskPassword(openFilePath);
     }
 }
 //For opening a file directly in protector ends
@@ -87,17 +79,7 @@ ipcRenderer.on("openFile", event => {
                     return;
                 }
                 filepath = fileNames[0];
-                fs.readFile(filepath, 'utf-8', (err, data) => {
-                    if (err) {
-                        alert("An error ocurred reading the file :" + err.message);
-                        return;
-                    }
-                    let fileName = path.basename(filepath);
-                    askPassword().then((password) => {
-                        openFile({ 'fileName': fileName, 'password': password, contents: data });
-                    })
-                    // global.win.webContents.send("openFile", data, fileName);
-                });
+                readFileAskPassword(filepath)
             });
     }
 });
@@ -126,8 +108,12 @@ ipcRenderer.on("saveFile", event => {
 function openFile(fileData) {
     if (fileData) {
         document.title = fileData.fileName;
+        let decryptedData =decrypt(fileData.password, fileData.contents)
         if (fileData.password) {
-            flask.updateCode(decrypt(fileData.password, fileData.contents));
+            if(decryptedData)
+                flask.updateCode(decryptedData);
+            else
+                console.log("Password Incorrect")
         } else {
             flask.updateCode(fileData.contents);
         }
@@ -136,16 +122,32 @@ function openFile(fileData) {
 
 //will return a promise
 function askPassword() {
-    let win = new remote.BrowserWindow({ width: 200, height: 100, minimizable: false, alwaysOnTop: true, maximizable: false });
+    let win = new remote.BrowserWindow({ show:false,width: 300, height: 100, minimizable: false, alwaysOnTop: true, maximizable: false, parent : remote.getCurrentWindow()});
     win.on('close', () => win = null)
     win.loadFile(path.join(__dirname, '/password.html'))
     //win.webContents.openDevTools()
     win.setMenu(null);
+    win.once('ready-to-show', () => {
+        win.show()
+      })
     return new Promise(function (resolve, reject) {
         ipcRenderer.on("informMainWindow", (event, { type, data }) => {
             if (type && type === 'password') {
                 resolve(data);
             }
+        })
+    })
+}
+
+function readFileAskPassword(filePath){
+    fs.readFile(filepath, 'utf-8', (err, data) => {
+        if (err) {
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        let fileName = path.basename(filepath);
+        askPassword().then((password) => {
+            openFile({ 'fileName': fileName, 'password': password, contents: data });
         })
     })
 }

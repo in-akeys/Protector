@@ -15,7 +15,8 @@ function createWindow() {
             height: 600,
             webPreferences: {
                 nodeIntegration: true
-            }
+            },
+            show:false
         })
 
     // and load the index.html of the app.
@@ -33,6 +34,9 @@ function createWindow() {
     })
     //setting main Win in global, so that it can be accessible from menu bar file
     global.win = win;
+    win.once('ready-to-show', () => {
+        win.show()
+      })
     require('./src/menu/menu.js')
 }
 
@@ -40,6 +44,7 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
