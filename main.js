@@ -22,7 +22,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '/src/index.html'))
 
     // Open the DevTools.
-    //win.webContents.openDevTools()
+    win.webContents.openDevTools()
 
     // Emitted when the window is closed.
     win.on('closed', () => {
@@ -31,6 +31,7 @@ function createWindow() {
         // when you should delete the corresponding element.
         win = null
     })
+    //setting main Win in global, so that it can be accessible from menu bar file
     global.win = win;
     require('./src/menu/menu.js')
 }
@@ -74,4 +75,10 @@ ipcMain.on("fileInitalized", (event, isFileEmpty) => {
 
 ipcMain.on("sendProcessObj", e => {
     e.returnValue = process;
+});
+
+
+ipcMain.on("informMainWindow", (event,data) => {
+
+    win.webContents.send("informMainWindow",data);
 });
